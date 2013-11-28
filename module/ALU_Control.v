@@ -11,9 +11,9 @@ output reg [2:0]   ALUCtrl_o;
 
 always@(ALUOp_i or funct_i) begin
   case(ALUOp_i)
-    2'b00 : ALUCtrl_o = 3'b010;
-    2'b01 : ALUCtrl_o = 3'b110;
-    2'b10 : ALUCtrl_o = 3'b001;
+    2'b00 : ALUCtrl_o = 3'b010; // lw, sw -> Add
+    2'b01 : ALUCtrl_o = 3'b110; // beq -> Sub
+    2'b10 : ALUCtrl_o = 3'b001; // ori -> Or
     2'b11 : begin
       case(funct_i[3:0])
         4'b0000 : ALUCtrl_o = 3'b010; // Add

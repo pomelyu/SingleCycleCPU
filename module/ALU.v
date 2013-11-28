@@ -18,11 +18,11 @@ always@(ALUCtrl_i or data1_i or data2_i) begin
     3'b001 : data_o = data1_i | data2_i;
     3'b010 : data_o = data1_i + data2_i;
     3'b110 : data_o = data1_i - data2_i;
-    3'b111 : data_o = data1_i - data2_i;
+    3'b111 : data_o = (data1_i - data2_i < 0)? 1:0;
     3'b011 : data_o = data1_i * data2_i;
   endcase
   
-  if (data_o == 0 || data_o < 0)
+  if (data_o == 0)
     Zero_o = 1'b1;
   else
     Zero_o = 1'b0; 

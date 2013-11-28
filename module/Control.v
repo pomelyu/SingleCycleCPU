@@ -71,6 +71,19 @@ always@(Op_i) begin
       ALUOp_o     = 2'b00; 
     end
     
+    // jump
+    6'b000010 :  begin
+      RegDst_o    = 1'bx;
+      ALUSrc_o    = 1'bx;
+      MemToReg_o  = 1'bx;
+      RegWrite_o  = 1'b0;
+      MemWrite_o  = 1'b0;
+      MemRead_o   = 1'b0;
+      Branch_o    = 1'b0;
+      Jump_o      = 1'b1;
+      ALUOp_o     = 2'bxx; 
+    end
+    
     // beq
     6'b000100 :  begin
       RegDst_o    = 1'bx;
@@ -82,19 +95,6 @@ always@(Op_i) begin
       Branch_o    = 1'b1;
       Jump_o      = 1'b0;
       ALUOp_o     = 2'b01; 
-    end
-    
-    // jump
-    6'b000100 :  begin
-      RegDst_o    = 1'bx;
-      ALUSrc_o    = 1'bx;
-      MemToReg_o  = 1'bx;
-      RegWrite_o  = 1'b0;
-      MemWrite_o  = 1'b0;
-      MemRead_o   = 1'b0;
-      Branch_o    = 1'b0;
-      Jump_o      = 1'b1;
-      ALUOp_o     = 2'bxx; 
     end
     
     // default

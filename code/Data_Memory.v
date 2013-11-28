@@ -13,13 +13,13 @@ output  reg [31:0]  ReadData_o;
 // Data memory
 reg       [31:0]  memory[0:7]; 
 
-always@(addr_i or WriteData_i or MemWrite_i or MemRead_i) begin
+always@(addr_i or WriteData_i or MemWrite_i or MemRead_i)#5 begin
 
-if (MemWrite_i == 1)
-  memory[addr_i>>2] = WriteData_i;
+if (MemWrite_i == 1'b1)
+  memory[addr_i] = WriteData_i;
 
-if (MemRead_i == 1)
-  ReadData_o = memory[addr_i>>2];
+if (MemRead_i == 1'b1)
+  ReadData_o = memory[addr_i];
   
 end
 

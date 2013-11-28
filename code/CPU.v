@@ -10,8 +10,8 @@ input               clk_i;
 input               rst_i;
 input               start_i;
 
-wire    [31:0]     inst, inst_addr_pc, inst_addr_add, dataToMem;
-wire    [31:0]     ALU_result, signExtend_out, Jump_addr;
+wire    [31:0]     inst, inst_addr_pc, inst_addr_add;
+wire    [31:0]     ALU_result, signExtend_out, dataToMem;
 
 
 // ====== For Cotrol ====== //
@@ -34,7 +34,7 @@ PC PC(
     .clk_i      (clk_i),
     .rst_i      (rst_i),
     .start_i    (start_i),
-    .pc_i       (MUX_Branch.data_o),
+    .pc_i       (MUX_Jump.data_o),
     .pc_o       (inst_addr_pc)
 );
 
@@ -53,7 +53,7 @@ MUX32 MUX_Branch(
 
 MUX32 MUX_Jump(
     .data1_i    (MUX_Branch.data_o),
-    .data2_i    ({inst_addr_add[31:28], Jump_addr[27:0]}),
+    .data2_i    (Shift_Jump.data_o),
     .select_i   (Control.Jump_o),
     .data_o     (PC.pc_i)
 );
@@ -80,8 +80,8 @@ AND AND_Branch(
 
 // ====== For jump ====== //
 ShiftLeft2 Shift_Jump(
-    .data_i    ({6'b000000, inst[25:0]}),
-    .data_o    (Jump_addr)
+    .data_i    ({2'b00, inst_addr_add[31:28], inst[25:0]}),
+    .data_o    (MUX_Jump.data2_i)
 );
 
 

@@ -16,11 +16,7 @@ input      [5:0]   Op_i;
 output reg [1:0]   ALUOp_o;
 output reg         RegDst_o, Jump_o, Branch_o, MemRead_o;
 output reg         MemToReg_o, MemWrite_o, ALUSrc_o, RegWrite_o;
-initial begin
- Jump_o = 0;
- Branch_o = 0;
- end
- 
+
 always@(Op_i) begin
   case(Op_i)
     // R-type
@@ -75,19 +71,6 @@ always@(Op_i) begin
       ALUOp_o     = 2'b00; 
     end
     
-    // jump
-    6'b000010 :  begin
-      RegDst_o    = 1'bx;
-      ALUSrc_o    = 1'bx;
-      MemToReg_o  = 1'bx;
-      RegWrite_o  = 1'b0;
-      MemWrite_o  = 1'b0;
-      MemRead_o   = 1'b0;
-      Branch_o    = 1'b0;
-      Jump_o      = 1'b1;
-      ALUOp_o     = 2'bxx; 
-    end
-    
     // beq
     6'b000100 :  begin
       RegDst_o    = 1'bx;
@@ -99,6 +82,19 @@ always@(Op_i) begin
       Branch_o    = 1'b1;
       Jump_o      = 1'b0;
       ALUOp_o     = 2'b01; 
+    end
+    
+    // jump
+    6'b000010 :  begin
+      RegDst_o    = 1'bx;
+      ALUSrc_o    = 1'bx;
+      MemToReg_o  = 1'bx;
+      RegWrite_o  = 1'b0;
+      MemWrite_o  = 1'b0;
+      MemRead_o   = 1'b0;
+      Branch_o    = 1'b0;
+      Jump_o      = 1'b1;
+      ALUOp_o     = 2'bxx; 
     end
     
     // default

@@ -3,14 +3,12 @@ module ALU
     data1_i,
     data2_i,
     ALUCtrl_i,
-    data_o,
-    Zero_o
+    data_o
 );
 
 input       [31:0]    data1_i, data2_i;
 input       [2:0]     ALUCtrl_i;
 output  reg [31:0]    data_o;
-output  reg           Zero_o;
 
 always@(ALUCtrl_i or data1_i or data2_i) begin
   case(ALUCtrl_i)
@@ -21,11 +19,7 @@ always@(ALUCtrl_i or data1_i or data2_i) begin
     3'b111 : data_o = (data1_i - data2_i < 0)? 1:0;
     3'b011 : data_o = data1_i * data2_i;
   endcase
-  
-  if (data_o == 0)
-    Zero_o = 1'b1;
-  else
-    Zero_o = 1'b0; 
+
 end
 
 endmodule

@@ -5,7 +5,9 @@ module MEM_WB(
   
   ReadData_o, ReadData_i,
   ALUresult_o, ALUresult_i,
-  InstDst_o, InstDst_i
+  InstDst_o, InstDst_i,
+  
+  stall_i
 );
   input clk;
   input [31:0] ReadData_i;
@@ -29,13 +31,26 @@ module MEM_WB(
   output RegWrite_o;
   reg RegWrite_o;
   
+  
+  input stall_i;
+  
 always@(posedge clk) begin
+  if(stall_i) begin
+   ReadData_o <= ReadData_o;
+   ALUresult_o <= ALUresult_o;
+   InstDst_o   <=  InstDst_o;
+
+   MemToReg_o <= MemToReg_o;
+   RegWrite_o <= RegWrite_o;
+  end
+  else begin
    ReadData_o <= ReadData_i;
    ALUresult_o <= ALUresult_i;
    InstDst_o   <=  InstDst_i;
 
    MemToReg_o <= MemToReg_i;
    RegWrite_o <= RegWrite_i;
+   end
 end  
 
 endmodule

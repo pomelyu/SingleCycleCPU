@@ -7,7 +7,9 @@ module EX_MEM(
   MemToReg_o, MemToReg_i,
   RegWrite_o, RegWrite_i,
   MemWrite_o, MemWrite_i,
-  MemRead_o, MemRead_i
+  MemRead_o, MemRead_i,
+  
+  stall_i
 );
   input  clk;
   input [31:0] ALUresult_i;
@@ -39,7 +41,21 @@ module EX_MEM(
   output MemRead_o;
   reg MemRead_o;
   
+  
+  input stall_i;
+  
 always@(posedge clk) begin
+  if(stall_i) begin
+  ALUresult_o <= ALUresult_o;
+  WriteData_o <=  WriteData_o;
+  InstDst_o   <=  InstDst_o;
+
+  MemToReg_o <= MemToReg_o;
+  RegWrite_o <= RegWrite_o;
+  MemWrite_o <= MemWrite_o;
+  MemRead_o  <= MemRead_o;
+  end
+  else begin
   ALUresult_o <= ALUresult_i;
   WriteData_o <=  WriteData_i;
   InstDst_o   <=  InstDst_i;
@@ -48,5 +64,6 @@ always@(posedge clk) begin
   RegWrite_o <= RegWrite_i;
   MemWrite_o <= MemWrite_i;
   MemRead_o  <= MemRead_i;
+  end
 end
 endmodule

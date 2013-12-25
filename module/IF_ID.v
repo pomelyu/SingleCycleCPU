@@ -1,5 +1,7 @@
 module IF_ID(
-  clk,inst_addr_add_i, inst_i, inst_addr_add_o, inst_o, IFID_Write_i,Flush_i
+  clk,inst_addr_add_i, inst_i, inst_addr_add_o, inst_o, IFID_Write_i,Flush_i,
+  
+  stall_i
 );
 input clk;
 input	[31:0] inst_addr_add_i;
@@ -13,7 +15,14 @@ reg [31:0] inst_addr_add_o;
 reg [31:0] inst_o;
 
 
+input stall_i;
+
 always@(posedge clk) begin
+  if(stall_i) begin
+    inst_addr_add_o <= inst_addr_add_o;
+    inst_o <= inst_o;
+  end
+else begin
   if(IFID_Write_i) begin
     inst_addr_add_o <= inst_addr_add_i;
     inst_o <= inst_i;
@@ -27,6 +36,7 @@ always@(posedge clk) begin
     inst_addr_add_o <= 32'b0;
     inst_o <= 32'b0;
     end	
+  end
 end
 
 

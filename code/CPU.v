@@ -2,13 +2,33 @@ module CPU
 (
     clk_i, 
     rst_i,
-    start_i
+    start_i,
+    
+    mem_data_i, 
+	  mem_ack_i, 	
+	  mem_data_o, 
+	  mem_addr_o, 	
+	  mem_enable_o, 
+	  mem_write_o
 );
 
 // Ports
 input               clk_i;
 input               rst_i;
 input               start_i;
+
+//
+// to Data Memory interface		
+//
+input	[255:0]	mem_data_i; 
+input				mem_ack_i; 	
+output	[255:0]	mem_data_o; 
+output	[31:0]	mem_addr_o; 	
+output				mem_enable_o; 
+output				mem_write_o; 
+
+wire    stall;
+
 
 wire    [31:0]     inst, inst_addr_pc, inst_addr_add, inst_EX;
 wire    [31:0]     ALU_result, signExtend_out, dataToMem;
@@ -113,7 +133,8 @@ IF_ID IF_ID(
   .inst_addr_add_o (Add_Branch.data1_i),
   .inst_o	(inst),
   .IFID_Write_i(Hazard_Detection_Unit.IFID_Write),
-  .Flush_i(OR.data_o)
+  .Flush_i(OR.data_o),
+  .stall_i(stall)
 );
 
 // ====== For registers ====== // 
@@ -171,19 +192,23 @@ ID_EX ID_EX(
   .MemRead_i(ctrl_signal[3]), .MemRead_o(EX_MEM.MemRead_i),
   .ALUsrc_i(ctrl_signal[4]), .ALUsrc_o(MUX_ALUSrc.select_i),
   .ALUop_i(ctrl_signal[6:5]), .ALUop_o(ALU_Control.ALUOp_i),
-  .regDst_i(ctrl_signal[7]), .regDst_o(MUX_RegDst.select_i)
+  .regDst_i(ctrl_signal[7]), .regDst_o(MUX_RegDst.select_i),
+  
+  .stall_i(stall)
 );
 // ====== EX_MEM flip-flop ======//
 EX_MEM EX_MEM(
   .clk(clk_i),
-  .ALUresult_o(Data_Memory.addr_i), .ALUresult_i(ALU.data_o),
-  .WriteData_o(Data_Memory.WriteData_i), .WriteData_i(mux7.data_o),
+  .ALUresult_o(dcache.p1_addr_i), .ALUresult_i(ALU.data_o),
+  .WriteData_o(dcache.p1_data_i), .WriteData_i(mux7.data_o),
   .InstDst_o(MEM_WB.InstDst_i), .InstDst_i(MUX_RegDst.data_o),
   
   .MemToReg_o(MEM_WB.MemToReg_i), .MemToReg_i(ID_EX.MemToReg_o),
   .RegWrite_o(MEM_WB.RegWrite_i), .RegWrite_i(ID_EX.RegWrite_o),
-  .MemWrite_o(Data_Memory.MemWrite_i), .MemWrite_i(ID_EX.MemWrite_o),
-  .MemRead_o(Data_Memory.MemRead_i), .MemRead_i(ID_EX.MemRead_o)
+  .MemWrite_o(dcache.p1_MemWrite_i), .MemWrite_i(ID_EX.MemWrite_o),
+  .MemRead_o(dcache.p1_MemRead_i), .MemRead_i(ID_EX.MemRead_o),
+  
+  .stall_i(stall)
 );
 // ====== MEM_WB flip-flop ======//
 MEM_WB MEM_WB(
@@ -191,9 +216,11 @@ MEM_WB MEM_WB(
   .MemToReg_o(MUX_MemToReg.select_i), .MemToReg_i(EX_MEM.MemToReg_o),
   .RegWrite_o(Registers.RegWrite_i), .RegWrite_i(EX_MEM.RegWrite_o),
   
-  .ReadData_o(MUX_MemToReg.data2_i), .ReadData_i(Data_Memory.ReadData_o),
+  .ReadData_o(MUX_MemToReg.data2_i), .ReadData_i(dcache.p1_data_o),
   .ALUresult_o(MUX_MemToReg.data1_i), .ALUresult_i(EX_MEM.ALUresult_o),
-  .InstDst_o(Forwarding_Unit.MEMWB_RegisterRd), .InstDst_i(EX_MEM.InstDst_o)
+  .InstDst_o(Forwarding_Unit.MEMWB_RegisterRd), .InstDst_i(EX_MEM.InstDst_o),
+  
+  .stall_i(stall)
 );
 // ====== Forwarding Unit ======//
 Forwarding_Unit Forwarding_Unit(
@@ -237,14 +264,32 @@ ALU_Control ALU_Control(
 );
 
 
-// ====== For data memory ====== // 
-Data_Memory Data_Memory(
-    .addr_i       (EX_MEM.ALUresult_o),
-    .WriteData_i  (EX_MEM.WriteData_o),
-    .MemWrite_i   (EX_MEM.MemWrite_o),
-    .MemRead_i    (EX_MEM.MemRead_o),
-    .ReadData_o   (MEM_WB.ReadData_i)
+
+
+//data cache
+dcache_top dcache
+(
+    // System clock, reset and stall
+	.clk_i(clk_i), 
+	.rst_i(rst_i),
+	
+	// to Data Memory interface		
+	.mem_data_i(mem_data_i), 
+	.mem_ack_i(mem_ack_i), 	
+	.mem_data_o(mem_data_o), 
+	.mem_addr_o(mem_addr_o), 	
+	.mem_enable_o(mem_enable_o), 
+	.mem_write_o(mem_write_o), 
+	
+	// to CPU interface	
+	.p1_data_i(EX_MEM.WriteData_o), 
+	.p1_addr_i(EX_MEM.ALUresult_o), 	
+	.p1_MemRead_i(EX_MEM.MemRead_o), 
+	.p1_MemWrite_i(EX_MEM.MemWrite_o), 
+	.p1_data_o(MEM_WB.ReadData_i), 
+	.p1_stall_o(stall)
 );
+
 
 MUX32 MUX_MemToReg(
     .data1_i    (MEM_WB.ALUresult_o),

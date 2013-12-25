@@ -11,7 +11,9 @@ module ID_EX(
   MemRead_i, MemRead_o,
   ALUsrc_i, ALUsrc_o,
   ALUop_i, ALUop_o,
-  regDst_i, regDst_o
+  regDst_i, regDst_o,
+  
+  stall_i
 );
   input clk;
   input [31:0] inst_i;
@@ -56,7 +58,25 @@ module ID_EX(
   output regDst_o;
   reg regDst_o;
   
+  
+  input stall_i;
+  
 always@(posedge clk) begin
+  if(stall_i) begin
+  inst_o <= inst_o;
+  sign_ext_o <= sign_ext_o;
+  data1_o <= data1_o;
+  data2_o <= data2_o;
+  
+  MemToReg_o <= MemToReg_o;
+  RegWrite_o <= RegWrite_o;
+  MemWrite_o <= MemWrite_o;
+  MemRead_o  <= MemRead_o;
+  ALUsrc_o   <= ALUsrc_o;
+  ALUop_o    <= ALUop_o;
+  regDst_o   <= regDst_o;
+  end
+  else begin
   inst_o <= inst_i;
   sign_ext_o <= sign_ext_i;
   data1_o <= data1_i;
@@ -69,6 +89,7 @@ always@(posedge clk) begin
   ALUsrc_o   <= ALUsrc_i;
   ALUop_o    <= ALUop_i;
   regDst_o   <= regDst_i;
+  end
 end
 
 endmodule

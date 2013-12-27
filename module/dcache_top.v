@@ -46,7 +46,7 @@ input	[32-1:0]	p1_addr_i;
 input				    p1_MemRead_i; 
 input				    p1_MemWrite_i; 
 
-output	[32-1:0]p1_data_o; 
+output	[32-1:0]	p1_data_o; 
 output				  p1_stall_o; 
 
 //
@@ -125,7 +125,7 @@ assign r_hit_data = sram_cache_data;
 // read data :  256-bit to 32-bit
 always@(p1_offset or r_hit_data) begin
 	//!!! add you code here! (p1_data=...?)
-	p1_data <= r_hit_data[(p1_offset+31) -: 32];
+	p1_data <= r_hit_data[(p1_offset * 8 + 31) -: 32];
 end
 
 
@@ -133,7 +133,7 @@ end
 always@(p1_offset or r_hit_data or p1_data_i) begin
 	//!!! add you code here! (w_hit_data=...?)
 	w_hit_data <= r_hit_data;
-	w_hit_data[(p1_offset+31) -: 32] <= p1_data_i;
+	w_hit_data[(p1_offset * 8 + 31) -: 32] <= p1_data_i;
 end
 
 

@@ -61,7 +61,7 @@ Hazard_Detection_Unit Hazard_Detection_Unit(
     .IDEX_RegisterRt(inst_EX[20:16]),
     .IFID_RegisterRs(inst[25:21]),
     .IFID_RegisterRt(inst[20:16]),
-    .PC_Write(PC.start_i),
+    .PC_Write(PC.enable_i),
     .IFID_Write(IF_ID.IFID_Write_i),
     .Control_select(MUX8.select_i)
 );
@@ -71,7 +71,9 @@ PC PC(
     .rst_i      (rst_i),
     .start_i    (start_i),
     .pc_i       (MUX_Jump.data_o),
-    .pc_o       (inst_addr_pc)
+    .pc_o       (inst_addr_pc),
+	.enable_i	(Hazard_Detection_Unit.PC_Write),
+	.stall_i	(stall)
 );
 
 Adder Add_PC(
